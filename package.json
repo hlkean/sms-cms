@@ -1,0 +1,29 @@
+{
+  "name": "sms-cms",
+  "version": "1.0.0",
+  "description": "This project makes it possible to update CMS content via SMS",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hlkean/sms-cms.git"
+  },
+  "author": "hlkean",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hlkean/sms-cms/issues"
+  },
+  "homepage": "https://github.com/hlkean/sms-cms#readme",
+  "dependencies": {
+    "@wix/data": "^1.0.101",
+    "@wix/sdk": "^1.9.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.2.0"
+  }
+}
