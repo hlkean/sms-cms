@@ -1,10 +1,13 @@
 import 'dotenv/config'
 import express from 'express';
-import {createDataCollection, listDataCollections, updateDataCollection, getDataCollection, saveDataItem} from './src/index.js';
+import bodyParser from 'body-parser';
+import {sendMessage, createMessage, createDataCollection, listDataCollections, updateDataCollection, getDataCollection, saveDataItem} from './src/index.js';
+
 const app = express();
 const port = 3000;
 
 app.use(express.json())
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get("/", async (req, res) => {
     res.send('Hello World!');
@@ -12,10 +15,16 @@ app.get("/", async (req, res) => {
 });
 
 // TODO:
-//  - Connect to Twilio
+//  - Add image support
 //  - Add unhappy path
+//    - Detect duplicate entries/updates
+//    - Handle errors
 //  - Add Session handling
 //    - Find existing items and update/remove them
+//    - Conversational intents
+//  - Add unit tests
+//  - Set up TS configuration
+//  - Switch files to TS
 
 
 app.get("collections/make", async (req, res) => {
@@ -85,6 +94,7 @@ app.get("/items/save", async (req, res) => {
     //         }
     //     }
     // }
+    console.log(req);
     await saveDataItem({dataCollectionId: req.body.collectionId, dataItem: req.body.dataItem}).then((data) => {
         console.log('data', data);
         res.send(data);
@@ -93,6 +103,35 @@ app.get("/items/save", async (req, res) => {
         res.send('got an error: ', error);
     })
 })
+
+app.get("/twilio/send", async (req, res) => {
+    await sendMessage(req.body.message)
+        .then((message) => {console.log(message.sid); res.send(message);})
+        .catch((error)=> {
+            console.log('got an error sending message: ', error);
+            res.send('got an error: ', error);
+        });
+});
+
+app.post('/sms', async (req, res) => {
+    console.log(req.body, req.body.Body);
+    const items = req.body.Body.toString().split('/');
+    const dataItem = {
+                "data": {
+                    "title": items[0],
+                    "description": items[1]
+                }
+            }
+    await saveDataItem({dataCollectionId: 'Menu', dataItem: dataItem}).then((data) => {
+        console.log('data', data);
+        res.send(data);
+    }).catch((error) => {
+        console.log('got an error: ', error);
+        res.send('got an error: ', error);
+    })
+    // const message = createMessage(req.body);
+    // res.type('text/xml').send(message);
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
