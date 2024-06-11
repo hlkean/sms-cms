@@ -1,9 +1,11 @@
 import 'dotenv/config'
 import express from 'express';
+import session from 'express-session';
 import bodyParser from 'body-parser';
 import {sendMessage, createMessage, createDataCollection, listDataCollections, updateDataCollection, getDataCollection, saveDataItem} from './src/index.js';
 
 const app = express();
+app.use(session({secret: process.env.SESSION_SECRET}));
 const port = 3000;
 
 app.use(express.json())
@@ -114,23 +116,26 @@ app.get("/twilio/send", async (req, res) => {
 });
 
 app.post('/sms', async (req, res) => {
-    console.log(req.body, req.body.Body);
-    const items = req.body.Body.toString().split('/');
-    const dataItem = {
-                "data": {
-                    "title": items[0],
-                    "description": items[1]
-                }
-            }
-    await saveDataItem({dataCollectionId: 'Menu', dataItem: dataItem}).then((data) => {
-        console.log('data', data);
-        res.send(data);
-    }).catch((error) => {
-        console.log('got an error: ', error);
-        res.send('got an error: ', error);
-    })
-    // const message = createMessage(req.body);
-    // res.type('text/xml').send(message);
+    console.log("session", req.session.id);
+    console.log("body", req.body);
+
+    // const items = req.body.Body.toString().split('/');
+    // const dataItem = {
+    //             "data": {
+    //                 "title": items[0],
+    //                 "description": items[1]
+    //             }
+    //         }
+    // await saveDataItem({dataCollectionId: 'Menu', dataItem: dataItem}).then((data) => {
+    //     console.log('data', data);
+    //     res.send(data);
+        res.sendStatus(200);
+    // }).catch((error) => {
+    //     console.log('got an error: ', error);
+    //     res.send('got an error: ', error);
+    // })
+    // // const message = createMessage(req.body);
+    // // res.type('text/xml').send(message);
 });
 
 app.listen(port, () => {
