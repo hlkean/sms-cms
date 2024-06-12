@@ -2,7 +2,7 @@ import 'dotenv/config'
 import express from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
-import {sendMessage, createMessage, createDataCollection, listDataCollections, updateDataCollection, getDataCollection, saveDataItem} from './src/index.js';
+import {sendMessage, createMessage, createDataCollection, listDataCollections, updateDataCollection, getDataCollection, saveDataItem, makeImage} from './src/index.js';
 
 const app = express();
 app.use(session({secret: process.env.SESSION_SECRET}));
@@ -116,9 +116,16 @@ app.get("/twilio/send", async (req, res) => {
 });
 
 app.post('/sms', async (req, res) => {
-    console.log("session", req.session.id);
+    console.log("session", req.session);
     console.log("body", req.body);
-
+    await makeImage(req.body.Body.toString()).then(() => {
+        console.log('image created, sending message');
+        const message = createMessage(req.body.from);
+        res.type('text/xml').send(message);
+    }).catch((error) => {
+        console.log('got an error: ', error);
+        res.send('got an error: ', error);
+    })
     // const items = req.body.Body.toString().split('/');
     // const dataItem = {
     //             "data": {
@@ -129,13 +136,12 @@ app.post('/sms', async (req, res) => {
     // await saveDataItem({dataCollectionId: 'Menu', dataItem: dataItem}).then((data) => {
     //     console.log('data', data);
     //     res.send(data);
-        res.sendStatus(200);
     // }).catch((error) => {
     //     console.log('got an error: ', error);
     //     res.send('got an error: ', error);
     // })
-    // // const message = createMessage(req.body);
-    // // res.type('text/xml').send(message);
+    // const message = createMessage(req.body);
+    // res.type('text/xml').send(message);
 });
 
 app.listen(port, () => {

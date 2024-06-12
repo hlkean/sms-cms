@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <style>
+            html, body {
+                height: 100vh;
+                width: 100vw;
+            }
+            body {
+               background-color: #FFF7F3;
+               color: #A23030;
+               height: 500px;
+               width: 500px;
+               display: flex;
+                flex-direction: column;
+            }
+            h1 {
+                font-weight: bold;
+                margin-left: 20px;
+                font-size: 32px;
+            }
+            .header {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            img {
+                height: 100px;
+                width: auto;
+            }
+            .menu {
+                flex-grow: 1;
+                display: flex;
+                align-items: center;
+            }
+            ul {
+                list-style-type: none;
+                margin: 0;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+            }
+            li {
+                margin-bottom: 10px;
+                font-size: 24px;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="header">
+            <h1>Ayyy Pie's On!</h1>
+            <img src="pie-oh-my.jpg" />
+        </section>
+        <section class="menu">
+            <ul>
+                <li>Blueberry</li>
+                <li>Key Lime</li>
+                <li>Apple</li>
+            </ul>
+        </section>
+    </body>
+</html>
