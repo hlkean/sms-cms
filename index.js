@@ -2,7 +2,10 @@ import 'dotenv/config'
 import express from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
-import {sendMessage, createMessage, createDataCollection, listDataCollections, updateDataCollection, getDataCollection, saveDataItem, makeImage} from './src/index.js';
+import {sendMessage, createMessage, createDataCollection, listDataCollections, saveDataItem, makeImageResponse} from './src/index.js';
+import * as path from 'path'
+import { fileURLToPath } from 'url';
+import { phrases, intents } from './src/constants.js';
 
 const app = express();
 app.use(session({secret: process.env.SESSION_SECRET}));
@@ -115,17 +118,38 @@ app.get("/twilio/send", async (req, res) => {
         });
 });
 
+app.get("/my/image", async (req, res) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    res.sendFile('/src/image-gen/test.jpg', {root: __dirname});
+});
+
 app.post('/sms', async (req, res) => {
     console.log("session", req.session);
     console.log("body", req.body);
-    await makeImage(req.body.Body.toString()).then(() => {
-        console.log('image created, sending message');
-        const message = createMessage(req.body.from);
-        res.type('text/xml').send(message);
-    }).catch((error) => {
-        console.log('got an error: ', error);
-        res.send('got an error: ', error);
-    })
+    console.log(typeof req.session.intent, req.session.intent);
+    if(typeof req.session.intent === 'undefined') {
+        await makeImageResponse(req, res);
+    } else if (req.session.intent === intents.imageMade) {
+        if(req.body.Body.toUpperCase() === phrases.approve) {
+            req.session.intent = undefined;
+            const message = createMessage({body: "Great! I'll get that posted for you."});
+            res.type('text/xml').send(message);
+        } else {
+            req.session.intent = intents.imageUpdate
+            await makeImageResponse(req, res);
+        }
+    } else if (req.session.intent === intents.imageUpdate) {
+        if(req.body.Body.toUpperCase() === phrases.approve) {
+            req.session.intent = undefined;
+            const message = createMessage({body: "Sorry for the back and forth! I'll get that posted for you"});
+            res.type('text/xml').send(message);
+        } else {
+            req.session.intent = intents.imageUpdate
+            await makeImageResponse(req, res);
+        }
+    
+    }
     // const items = req.body.Body.toString().split('/');
     // const dataItem = {
     //             "data": {
